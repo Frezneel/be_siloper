@@ -14,10 +14,12 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $isProfileEndpoind = $request->is('api/me');
         return [
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
+            'must_change_password' => (bool) $this->must_change_password,
             'roles' => $this->whenLoaded('roles', function () {
                 return $this->roles->map(function ($role) {
                     return [
@@ -26,7 +28,8 @@ class UserResource extends JsonResource
                     ];
                 });
             }),
-            // 'role' => $this->whenLoaded('roles'),
+            'created_at' => $this->when(! $isProfileEndpoind, $this->created_at->toISOString()),
+            'updated_at' => $this->when(! $isProfileEndpoind, $this->updated_at->toISOString()),
         ];
     }
 }

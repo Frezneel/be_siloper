@@ -15,8 +15,6 @@ class RolePermission extends Model
     protected $hidden = [
         'created_at',
         'updated_at',
-        'is_deleted',
-        'deleted_at',
     ];
 
     public function role()

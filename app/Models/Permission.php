@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Permission extends Model
 {
-    use SoftDeletes;
-
     protected $table = 'permissions';
     protected $fillable = [
         'name',
@@ -18,8 +16,6 @@ class Permission extends Model
     protected $hidden = [
         'created_at',
         'updated_at',
-        'is_deleted',
-        'deleted_at',
     ];
 
     public function getActiveRoles()

@@ -6,13 +6,13 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Auth\LoginRequest;
-use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\PasswordChangeRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 
 class AuthController extends Controller
 {
+    // Login #1
     public function login(LoginRequest $request)
     {
         $credentials = $request->validated();
@@ -40,26 +40,49 @@ class AuthController extends Controller
         ]);
     }
 
+    //Password Update #2
     public function updatePassword(PasswordChangeRequest $request)
     {
         $request->validated();
         /** @var User $user */
         $user = Auth::user();
 
-        if (!password_verify($request->current_password, $user->password)) {
+        if(!$user->must_change_password){
             return response()->json([
-                'message' => 'Current password is incorrect',
+                'message' => 'You cannot use this endpoint, Use profile settings instead'
+            ],403);
+        }
+
+        if (password_verify($request->new_password, $user->password)) {
+            return response()->json([
+                'message' => 'Current password is same, make different',
             ], 400);
         }
 
         $user->password = bcrypt($request->new_password);
+        $user->must_change_password = false;
         $user->save();
 
         return response()->json([
-            'message' => 'Password changed successfully',
+            'message' => 'Password updated successfully',
         ]);
     }
 
+    //check self user /me #3
+
+    public function me(Request $request){
+        $user = $request->user();
+        $user->load('roles');
+        //Ambil data permission
+        $permissions = $user->getActivePermissions();
+
+        return response()->json([
+            'user' => UserResource::make($user),
+            'permission' => $permissions,
+        ]);
+    }
+
+    //Logout #4
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
@@ -68,4 +91,6 @@ class AuthController extends Controller
             'message' => 'User logged out successfully',
         ]);
     }
+
+
 }

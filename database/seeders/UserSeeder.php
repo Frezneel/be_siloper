@@ -4,7 +4,9 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Models\Role;
 
 class UserSeeder extends Seeder
 {
@@ -13,16 +15,19 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        $adminRole = Role::where('name', 'admin')->firstOrFail();
         $user = User::UpdateOrCreate(
-            ['name'=> 'galih'],
+            ['name'=> 'administrator'],
             [
-                'email' => 'galih@gmail.com',
-                'password' => bcrypt('qwerty1234')
+                'email' => 'administrator@siloper.local',
+                'password' => Hash::make('administrator'),
+                'must_change_password' => true,
             ]
         );
 
         $user->roles()->sync([
-            1=>[
+            $adminRole->id => [
+                'is_active' => true,
                 'start_date' => now(),
                 'end_date' => null,
             ]
